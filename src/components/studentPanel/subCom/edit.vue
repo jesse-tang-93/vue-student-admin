@@ -5,7 +5,8 @@
     width="30%"
     :before-close="handleClose"
   >
-    <el-form ref="form" :model="form" label-width="80px">
+    <!-- form-content -->
+    <el-form ref="editForm" :model="form" label-width="80px" :rules="rules">
       <el-form-item label="学生姓名">
         <el-input v-model="form.name"></el-input>
       </el-form-item>
@@ -25,13 +26,16 @@
         <el-input v-model="form.teacher"></el-input>
       </el-form-item>
     </el-form>
+    <!-- btn-group -->
     <span slot="footer" class="dialog-footer">
       <el-button @click="$emit('toggleDialogVisible')">取 消</el-button>
-      <el-button type="primary" @click="onSubmit">确 定</el-button>
+      <el-button type="primary" @click="onSubmit('editForm')">确 定</el-button>
     </span>
   </el-dialog>
 </template>
 <script>
+// 自定义api请求baseUrl
+const apiUrl = process.env.VUE_APP_BASE_URL;
 export default {
   props: {
     dialogVisible: {
@@ -52,6 +56,13 @@ export default {
         age: "",
         grade: "",
         teacher: "",
+        id: "",
+      },
+      rules: {
+        name: [
+          { required: true, message: "请输入学生姓名", trigger: "blur" },
+          { min: 2, max: 5, message: "长度在 2 到 5 个字", trigger: "blur" },
+        ],
       },
     };
   },
@@ -65,9 +76,39 @@ export default {
   beforeDestroy() {},
   // 组件内方法
   methods: {
-    onSubmit() {
-      console.log("submit!");
+    onSubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          const { id } = this.form;
+          if (id) {
+            this.submitEdit();
+          } else {
+            this.submitAdd();
+          }
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
     },
+    submitEdit() {},
+    // 提交新增学生信息
+    submitAdd() {
+      let { form } = this;
+      delete form.id;
+      fetch(`${apiUrl}/studentList`, {
+        method: "POST",
+        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(async (res) => {
+        if (res.ok) {
+          this.$emit("getList");
+        }
+      });
+    },
+    // 关闭弹框
     handleClose() {
       this.$emit("toggleDialogVisible");
     },

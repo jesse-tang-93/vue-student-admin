@@ -4,6 +4,7 @@
     <el-button type="primary" style="margin-bottom:10px;" @click="addStudent">
       新增学生
     </el-button>
+    <!-- table content -->
     <el-table
       :data="studentData"
       border
@@ -27,15 +28,18 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 新增和编辑 -->
     <Edit
       :dialogType="dialogType"
       :dialogVisible="dialogVisible"
       @toggleDialogVisible="toggleDialogVisible"
+      @getList="getList"
     />
   </div>
 </template>
 <script>
 import Edit from "./subCom/edit";
+// 自定义api请求baseUrl
 const apiUrl = process.env.VUE_APP_BASE_URL;
 export default {
   components: {
@@ -56,37 +60,54 @@ export default {
   beforeCreate() {},
   created() {},
   mounted() {
-    this.tableLoading = true;
-    fetch(`${apiUrl}/studentList`)
-      .then(async (res) => {
-        if (res.ok) {
-          return res.json();
-        }
-      })
-      .then((data) => {
-        console.log(data);
-        this.studentData = data;
-        this.tableLoading = false;
-      })
-      .catch((e) => {
-        console.log(e);
-        this.tableLoading = false;
-      });
+    this.getList();
   },
   beforeDestroy() {},
   // 组件内方法
   methods: {
-    //  编辑弹框按钮与隐藏
+    getList() {
+      this.tableLoading = true;
+      fetch(`${apiUrl}/studentList`)
+        .then(async (res) => {
+          if (res.ok) {
+            return res.json();
+          }
+        })
+        .then((data) => {
+          console.log(data);
+          this.studentData = data;
+          this.tableLoading = false;
+        })
+        .catch((e) => {
+          console.log(e);
+          this.tableLoading = false;
+        });
+    },
+    // 编辑弹框按钮与隐藏
     toggleDialogVisible() {
       console.log(11);
       this.dialogVisible = !this.dialogVisible;
     },
+    // 编辑
     editItem(row) {
       this.dialogType = "edit";
       this.toggleDialogVisible();
       console.log(row);
     },
-    deleteItem() {},
+    // 删除某个学生
+    deleteItem({ id }) {
+      fetch(`${apiUrl}/studentList/${id}`, {
+        method: "DELETE",
+      }).then(async (res) => {
+        if (res.ok) {
+          this.$message({
+            message: "删除成功",
+            type: "success",
+          });
+          this.getList();
+        }
+      });
+    },
     // 新增学生
     addStudent() {
       this.dialogType = "add";

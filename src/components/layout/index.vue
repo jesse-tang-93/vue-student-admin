@@ -50,11 +50,10 @@ export default {
   methods: {
     // 获取当前时间段
     getQuantum(nums) {
-      console.log(nums);
       let result = "";
       if (nums > 1 && nums < 6) {
         result = "凌晨好";
-      } else if (nums > 9 && nums < 10) {
+      } else if (nums > 6 && nums < 10) {
         result = "早上好";
       } else if (nums > 10 && nums < 14) {
         result = "中午好";
