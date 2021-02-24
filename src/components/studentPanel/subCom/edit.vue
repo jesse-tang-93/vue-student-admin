@@ -46,6 +46,10 @@ export default {
       type: String,
       default: "add",
     },
+    editForm: {
+      type: Object,
+      default: () => {},
+    },
   },
   // 组件数据部分
   data() {
@@ -67,7 +71,26 @@ export default {
     };
   },
 
-  watch: {},
+  watch: {
+    editForm: {
+      handler(val) {
+        if (Object.keys(val).length) {
+          Object.assign(this.form, val);
+        } else {
+          Object.assign(this.form, {
+            name: "",
+            sex: "",
+            age: "",
+            grade: "",
+            teacher: "",
+            id: "",
+          });
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   computed: {},
   // 组件生命周期
   beforeCreate() {},
@@ -86,16 +109,32 @@ export default {
             this.submitAdd();
           }
         } else {
-          console.log("error submit!!");
           return false;
         }
       });
     },
-    submitEdit() {},
+    submitEdit() {
+      let { form } = this;
+      fetch(`${apiUrl}/studentList/${form.id}`, {
+        method: "PUT",
+        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(async (res) => {
+        if (res.ok) {
+          this.$message({
+            message: "编辑成功",
+            type: "success",
+          });
+          this.handleClose();
+          this.$emit("getList");
+        }
+      });
+    },
     // 提交新增学生信息
     submitAdd() {
       let { form } = this;
-      delete form.id;
       fetch(`${apiUrl}/studentList`, {
         method: "POST",
         body: JSON.stringify(form),
@@ -104,6 +143,11 @@ export default {
         },
       }).then(async (res) => {
         if (res.ok) {
+          this.$message({
+            message: "新增成功",
+            type: "success",
+          });
+          this.handleClose();
           this.$emit("getList");
         }
       });

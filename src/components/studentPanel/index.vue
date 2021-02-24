@@ -32,6 +32,7 @@
     <Edit
       :dialogType="dialogType"
       :dialogVisible="dialogVisible"
+      :editForm="editForm"
       @toggleDialogVisible="toggleDialogVisible"
       @getList="getList"
     />
@@ -52,6 +53,7 @@ export default {
       dialogType: "add", // 弹框类型 edit-编辑 add-新增
       dialogVisible: false,
       studentData: [],
+      editForm: {}, // 编辑时信息
     };
   },
   watch: {},
@@ -74,25 +76,22 @@ export default {
           }
         })
         .then((data) => {
-          console.log(data);
           this.studentData = data;
           this.tableLoading = false;
         })
-        .catch((e) => {
-          console.log(e);
+        .catch(() => {
           this.tableLoading = false;
         });
     },
     // 编辑弹框按钮与隐藏
     toggleDialogVisible() {
-      console.log(11);
       this.dialogVisible = !this.dialogVisible;
     },
     // 编辑
     editItem(row) {
       this.dialogType = "edit";
+      this.editForm = row;
       this.toggleDialogVisible();
-      console.log(row);
     },
     // 删除某个学生
     deleteItem({ id }) {
@@ -111,6 +110,7 @@ export default {
     // 新增学生
     addStudent() {
       this.dialogType = "add";
+      this.editForm = {};
       this.toggleDialogVisible();
     },
   },
